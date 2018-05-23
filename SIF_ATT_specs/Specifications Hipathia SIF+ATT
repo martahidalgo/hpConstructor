@@ -1,0 +1,43 @@
+
+INTRO
+========
+Hipathia is able to read and include graphs from SIF files with attributes with the following features:
+- Each pathway should be saved in two different files: .att (ATT file) and .sif (SIF file).
+- The SIF and ATT files should have the same name, i.e. hsa04370.sif and hsa04370.att for the pathway with ID hsa04370.
+- Functions are not included in this files, but annotated "a posteriori" following a file of annotations from genes to functions.
+
+
+SIF FILE
+=============
+- Text file with three columns separated by tabulars.
+- Each row represents an interaction in the pathway. First column is the source node, third column the target node, and the second is the type of relation between them.
+- Only activation and inhibition interactions are allowed.
+- The name of the nodes in this file will be stored as the IDs of the nodes.
+- The nodes IDs should have the following structure: N (dash) pathway ID (dash) node ID.
+- Hipathia distinguish between two types of nodes: simple and complex. 
+  - Simple nodes may include many genes, but only one is needed to perform the function of the node. 
+  - Complex nodes include different simple nodes and represent protein complexes. Each simple node within the complex represents one protein in the complex. This node requires the presence of all their simple nodes to perform its function.
+- Node IDs from simple nodes do not include any space, i.e. N-hsa04370-11. 
+- Node IDs from complex nodes are the juxtaposition of the included simple node IDs, separated by spaces, i.e. N-hsa04370-10 26. 
+
+
+ATT FILE
+============
+- Text file with twelve columns separated by tabulars.
+- Each row represents a node (either simple or complex).
+- The columns included are:
+  - ID: Node ID as explained above.
+  - label: Name to be shown in the picture of the pathway. Generally, the gene name of the first included EntrezID gene is used as label. For complex nodes, we juxtapose the gene names of the first genes of each simple node included (see genesList column below).
+  - X: X-coordinate of the position of the node in the pathway.
+  - Y: Y-coordinate of the position of the node in the pathway.
+  - color: Default color of the node.
+  - shape: Shape of the node. "rectangle" should be used for genes and "circle" for metabolites.
+  - type: Type of the node, either "gene" for genes or "compound" for metabolites. For complex nodes, the type of each of their included simple nodes is juxtaposed separated by commas, i.e. gene,gene.
+  - label.cex: Amount by which plotting label should be scaled relative to the default.
+  - label.color: Default color of the node.
+  - width: Default width of the node.
+  - height: Default height of the node.
+  - genesList: List of genes included in each node, with EntrezID:
+    - Simple nodes: EntrezIDs of the genes included, separated by commas (",") and no spaces, i.e. 56848,8877 for node N-hsa04370-11.
+    - Complex nodes: GenesList of the simple nodes included, separated by a slash ("/") and no spaces, and in the same order as in the node ID. For example, node N-hsa04370-10 26 includes two simple nodes: 10 and 26. Its genesList column is 5335,5336,/,9047, meaning that the genes included in node 10 are 5335 and 5336, and the gene included in node 26 is 9047.
+

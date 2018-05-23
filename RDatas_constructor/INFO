@@ -1,0 +1,20 @@
+
+Para rehacer todos los archivos habría que ejecutar en este orden:
+
+1.- Descomprimir xref/refs.tar.gz en la misma carpeta xref/
+2.- Ejecutar xref/xref.R
+3.- Ejecutar parte XREF de pack_data_by_species.R
+
+4.- Descomprimir annotations/raw_data.tar.gz en la misma carpeta annotations/
+5.- Ejecutar annotations/prepare_annotations.R
+6.- Ejecutar parte ANNOTATIONS de pack_data_by_species.R
+
+7.- Descomprimir pathways/XMLs.tar.gz en la misma carpeta pathways/
+8.- Ejecutar pathways/scripts/create_metaginfo.R
+9.- Ejecutar parte PATHWAYS de pack_data_by_species.R
+
+10.- Ejecutar annofuns/create_annofuns.R
+11.- Ejecutar parte ANNOFUNS de pack_data_by_species.R
+
+12.- Ejecutar pathways/scripts/create_pseudo_mgi.R
+13.- Ejecutar parte PSEUDO PATHWAYS de pack_data_by_species.R

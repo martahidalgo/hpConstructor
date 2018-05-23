@@ -1,0 +1,188 @@
+
+library(R.utils)
+
+#Rscript pred_cli.r --pretty_home . --species hsa --exp_file /fsclinic/common/analisis/validation_data/data/BRCA_genes_vals_LN.txt --design_file /fsclinic/common/analisis/validation_data/data/BRCA_Luminal-Basal_ED.txt --design_type categorical --cond1 Tumor --cond2 Normal --output_folder /home/aamadoz/001_pathipredRNAseq1015/example_results/
+
+#### INPUT DATA
+
+args <- commandArgs(trailingOnly = F, asValues = T,excludeEnvVars = F)
+pretty_home <- paste0(dirname(normalizePath(args[["file"]])),"/")
+
+species <- args[['species']]
+
+exp_file <- args[['exp_file']]
+
+design_file <- args[['design_file']]
+design_type <- args[['design_type']]
+cond1 <- args[['cond1']]
+cond2 <- args[['cond2']]
+
+decompose <- args[['decompose']]
+
+filter_paths <- args[['filter_paths']] # F (best model) or T (mechanism-based biomarkers prioritization)
+
+output_folder <- args[['output_folder']]
+
+# 
+# pretty_home <- "."
+# exp_file <- "~/BRCA_genes_vals_LN.txt"
+# design_file <- "~/BRCA_Luminal-Basal_ED.txt"
+# cond2 <- "Tumor"
+# cond1 <- "Normal"
+# design_type <- "categorical"
+# species <- "hsa"
+# filter_paths <- T
+# output_folder <- "/mnt/data2/ngs2/web_pretty/pretty_ko/here4"
+# decompose <- F
+
+# parse
+
+if(is.null(decompose)) decompose <- F
+
+if(design_type=="categorical") {
+  if(is.null(cond1) | is.null(cond2)) {
+    cond1 <- "Tumor"
+    cond2 <- "Normal"
+  }
+}
+
+if(is.null(filter_paths)) {
+  filter_paths <- F
+}
+
+cat("\nWELCOME TO PRETTYWAYS (perhaps CYGNUS)!!!\n")
+cat("\nDetected params: \n")
+cat("\tpretty_home: ",pretty_home,"\n")
+cat("\tspecies: ",species,"\n")
+cat("\texp_file: ",exp_file,"\n")
+cat("\tdesign_file: ",design_file,"\n")
+cat("\tdesign_type: ",design_type,"\n")
+cat("\tcond1: ",cond1,"\n")
+cat("\tcond2: ",cond2,"\n")
+cat("\tfilter_paths: ",filter_paths,"\n")
+cat("\tdecompose: ",decompose,"\n")
+cat("\toutput_folder: ",output_folder,"\n")
+cat("\n\n")
+
+# rm (list = ls ())
+# pretty_home <- "/home/aamadoz/001_pathipredRNAseq1015/prettyways/"
+# species <- "hsa"
+# exp_file <- "/fsclinic/common/analisis/validation_data/data/BRCA_genes_vals_LN.txt"
+# design_file <- "/fsclinic/common/analisis/validation_data/data/BRCA_Luminal-Basal_ED.txt"
+# cond1 <- "Tumor"
+# cond2 <- "Normal"
+# decompose <- F
+# design_type <- "categorical"
+# filter_paths <- F
+# output_folder <- "/home/aamadoz/001_pathipredRNAseq1015/example_results/"
+#
+#### PREPARE DATA
+
+source(paste0(pretty_home,"/prettyways.R"))
+source(paste0(pretty_home,"/predict.r"))
+source(paste0(pretty_home,"/stats.R"))
+source(paste0(pretty_home,"/functions.r"))
+source(paste0(pretty_home,"/web.r"))
+
+dir.create(output_folder)
+status <- function(value){
+  write(value,file=paste0(output_folder,"/status.txt"))
+}
+status("0")
+
+options(warn=-1)
+load(paste0(pretty_home,"/files/pathigraphs_functions_AMEND.RData"))
+fpathigraphs <- fpgs[c("hsa04014","hsa04015","hsa04010","hsa04012","hsa04310","hsa04350","hsa04390","hsa04370","hsa04630","hsa04068","hsa04071","hsa04024","hsa04151","hsa04150","hsa04110","hsa04210","hsa04115","hsa04620")]
+pathigraph.genes <- all.needed.genes(fpathigraphs)
+options(warn=0)
+status("4")
+
+#### LOAD DATA
+
+cat("Loading data...\n")
+
+exp <- read.table(exp_file,header=T,sep="\t",stringsAsFactors=F,row.names = 1)
+des <- read.table(design_file,header=F,stringsAsFactors=F)
+colnames(des) <- c("sample","group")
+rownames(des) <- des$sample
+
+sel_samples <- intersect(colnames(exp),rownames(des))
+exp <- exp[,sel_samples]
+des <- des[sel_samples,]
+
+#### PREPROCESS DATA
+
+cat("Scaling expression values...\n")
+
+exp <- normalize.data(exp,by.quantiles = F,by.gene = F,percentil = F)
+exp <- add.missing.genes(exp,genes=pathigraph.genes)
+
+status("20")
+
+#### RUN
+
+# pretty results
+cat("Propagating signaling...\n")
+results <- prettyways(exp, fpathigraphs,verbose=F)
+
+status("50")
+
+#### ANALYSIS
+
+if(decompose==T){
+  path.vals <- results$all$path.vals
+} else {
+  path.vals <- results$all$effector.path.vals
+}
+n <- ncol(path.vals)
+# define k depending on sample size
+if(n <=20) {k=3} else if (k<=30) {k=5} else {k=10}
+
+## predictor
+cat("Generating prediction model...\n")
+mod <- get.prediction.model(path.vals, des, design_type, k, filter_paths)
+
+cat("Calculating prediction model statistics...\n")
+mod_stats <- get.predmod.stats(mod, design_type)
+
+status("95")
+
+#### SAVE RESULTS
+
+cat("Creating report...\n")
+
+save.pred.res(mod,mod_stats,results,path.vals,fpathigraphs,output_folder,filter_paths, effector=(decompose==F))
+
+
+################## new report
+
+results <- init.result("prettypred")
+
+results <- add.input.param(results,"species",species)
+
+results <- add.section(results,"Input params")
+results <- add.download(results,"Expression file",basename(exp_file))
+results <- add.download(results,"Design file",basename(design_file))
+results <- add.param(results,"Design type",design_type)
+results <- add.param(results,"Sample size",n)
+results <- add.param(results,"K-fold cross-validation",k)
+results <- add.param(results,"Decomposed paths",decompose)
+results <- add.param(results,"Filter paths",filter_paths)
+
+results <- add.section(results,"Path values")
+results <- add.download(results,"Path values","path_vals.txt")
+results <- add.download(results,"Prediction model","model.RData")
+results <- add.table(results,"Statistics","model_stats.txt")
+if(filter_paths) {
+  results <- add.section(results,"Selected paths")
+  results <- add.download(results,"Selected features","filtered_features_cfs.txt")
+  results <- add.html(results,"network.html")
+}
+
+write(render.xlm(results),file=paste0(output_folder,"/report.xml"))
+
+#unlink(paste0(output_folder,"/sifs4CellMaps"),recursive = T)
+
+cat("[Finished]\n")
+
+status("100")

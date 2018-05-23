@@ -1,0 +1,15 @@
+
+INFO DISEASES ANNOTATIONS
+
+En esta carpeta se crean los ficheros de anotación de enfermedades para Hipathia. 
+
+  1.- Los ficheros de la carpeta CTDfiles son ficheros de anotación de enfermedades de la base de datos Comparative Toxicogenomics Database (CTD).
+
+      Se pueden descargar desde la web:
+      http://ctdbase.org/downloads/
+
+      Los nombres de los ficheros no se han cambiado, los ficheros se llaman igual que se encuentran en esta web.
+
+
+  2.- La carpeta disease_halmarks_annotations_Cankut contiene anotaciones hechas por Cankut, que se pueden encontrar en el Google Drive: 
+      https://drive.google.com/drive/folders/1cSndC6tibeoL1b81BIDtScfYooBbRIFu

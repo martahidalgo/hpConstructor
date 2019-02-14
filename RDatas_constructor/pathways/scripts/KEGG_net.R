@@ -141,7 +141,7 @@ splitKEGGgroup <- function(pathway) {
 }
 
 
-parse.kegg.to.igraph <- function(name.pathway, folder, comp.list, 
+parse.kegg.to.igraph <- function(name.pathway, folder, 
                                  genesOnly = FALSE){
   kegg.pathway <- parseKGML(paste0(folder, "/", name.pathway, ".xml"))
 
@@ -153,7 +153,7 @@ parse.kegg.to.igraph <- function(name.pathway, folder, comp.list,
   new.pathway <- delete.isolated.nodes( new.pathway )
   nodeDataDefaults( new.pathway, "Title" ) <- kegg.pathway@pathwayInfo@title
 
-  graph <- kegg2igraph(name.pathway, new.pathway, comp.list)
+  graph <- kegg2igraph(name.pathway, new.pathway)
 
   return(graph)
 }
@@ -162,7 +162,7 @@ parse.kegg.to.igraph <- function(name.pathway, folder, comp.list,
 
 
 # Returns an igraph created from a KEGGGraph
-kegg2igraph <- function( name.pathway, kgraph, comp.list ){
+kegg2igraph <- function( name.pathway, kgraph ){
 
   stopifnot(is(kgraph@nodeData@defaults$KEGGNode$nodes[[1]], "KEGGNode"))
   weights <- add.weight.info( kgraph )
@@ -229,13 +229,13 @@ kegg2igraph <- function( name.pathway, kgraph, comp.list ){
       }
   })
   
-  comp.is <- which(V(ig)$type == "compound")
-  for(i in comp.is){
-      cpd <- gsub("\\*", "", V(ig)$label[i])
-      if(cpd %in% comp.list$simple.ID)
-          V(ig)$label[i] <- gsub(cpd, comp.list[comp.list$simple.ID == cpd, 2], 
-                                 V(ig)$label[i])
-  }
+  # comp.is <- which(V(ig)$type == "compound")
+  # for(i in comp.is){
+  #     cpd <- gsub("\\*", "", V(ig)$label[i])
+  #     if(cpd %in% comp.list$simple.ID)
+  #         V(ig)$label[i] <- gsub(cpd, comp.list[comp.list$simple.ID == cpd, 2], 
+  #                                V(ig)$label[i])
+  # }
   V(ig)$name <- paste("N", name.pathway, V(ig)$name, sep="-")
 
   return(ig)

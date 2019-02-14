@@ -80,7 +80,7 @@ for(spe in species){
     # Compute Path Normalization Values
     metaginfo <- create.metaginfo.object(fpgs, spe)
     save(metaginfo, file=paste0(tmp.folder, "/meta_graph_info_", spe,
-                                ".RData"))
+                                "_2019_02_13.RData"))
 
 }
 

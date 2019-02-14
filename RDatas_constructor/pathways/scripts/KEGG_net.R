@@ -215,27 +215,22 @@ kegg2igraph <- function( name.pathway, kgraph, comp.list ){
           #         gsub("\n", "<br>", V(ig)$label[i])
           #     }else{""}
       }else if(V(ig)$shape[i] == "circle"){
-          if(grepl("BR:", V(ig)$label[i]) == TRUE){
-              n <- gsub("BR:", "", unlist(strsplit(V(ig)$label[i], split = "\\("))[1])
-              paste0("<a target='_blank' ",
-                     "href='http://www.genome.jp/kegg-bin/get_htext?", n, "'>", 
-                     n, "</a>")
-          }else{
-              n <- gsub("\\*", "", V(ig)$label[i])
-              paste0("<a target='_blank' ",
-                     "href='http://www.genome.jp/dbget-bin/www_bget?", n, "'>", 
-                     n, "</a>")
-          }
+          link <- kgraph@nodeData@defaults$KEGGNode$nodes[[V(ig)$name[i]]]@link
+          paste0("<a target='_blank' href='", link, "'>", V(ig)$label[i], "</a>")
+          # if(grepl("BR:", V(ig)$label[i]) == TRUE){
+          #     n <- gsub("BR:", "", unlist(strsplit(V(ig)$label[i], split = "\\("))[1])
+          #     paste0("<a target='_blank' ",
+          #            "href='http://www.genome.jp/kegg-bin/get_htext?", n, "'>", 
+          #            n, "</a>")
+          # }else{
+          #     n <- gsub("\\*", "", V(ig)$label[i])
+          #     paste0("<a target='_blank' ",
+          #            "href='http://www.genome.jp/dbget-bin/www_bget?", n, "'>", 
+          #            n, "</a>")
+          # }
       }
   })
   
-  comp.is <- which(V(ig)$type == "compound")
-  for(i in comp.is){
-      cpd <- gsub("\\*", "", V(ig)$label[i])
-      if(cpd %in% comp.list$simple.ID)
-          V(ig)$label[i] <- gsub(cpd, comp.list[comp.list$simple.ID == cpd, 2], 
-                                 V(ig)$label[i])
-  }
   V(ig)$name <- paste("N", name.pathway, V(ig)$name, sep="-")
 
   return(ig)
@@ -251,34 +246,84 @@ get.shape <- function(kgraph){
 
 
 
+# # Returns a list where each entry is the first name of each protein included in each node
+# get.name.nodes <- function( kgraph ){
+#   nodes <- kgraph@nodeData@defaults$KEGGNode$nodes
+#   node.names <- NULL
+#   for(i in 1:length(nodes)){
+#     if( grepl( "[", nodes[[i]]@graphics@name, fixed = TRUE  )){
+#       names.cor <- unlist(strsplit(nodes[[i]]@graphics@name, "[", fixed = TRUE))
+#       names.cor <- names.cor[which(names.cor != "")]
+#     }else{
+#       names.cor <- nodes[[i]]@graphics@name[[1]]
+#     }
+#     names <- NULL
+#     for( j in 1:length(names.cor)){
+#       names.cor[[j]] <- gsub("]", "", names.cor[[j]], fixed=TRUE)
+#       names.cor[[j]] <- gsub("...", "", names.cor[[j]], fixed=TRUE)
+#       if(nodes[[i]]@type == "other"){
+#           namesj <- unlist(strsplit(names.cor[[j]], "\\("))
+#           names <- paste(names, gsub("\\)", "", namesj[[2]]), sep = " ")
+#       }else{
+#           namesj <- unlist(strsplit(names.cor[[j]], ","))
+#           names <- paste( names, namesj[[1]], sep = " ")
+#       }
+#     }
+#     names <- sub( " ", "", names, fixed = TRUE )
+#     while( names %in% node.names )
+#       names <- paste( names, "*", sep="")
+#     node.names <- c( node.names, names )
+#   }
+#   return( node.names )
+# }
+
+
 # Returns a list where each entry is the first name of each protein included in each node
 get.name.nodes <- function( kgraph ){
-  nodes <- kgraph@nodeData@defaults$KEGGNode$nodes
-  node.names <- NULL
-  for( i in 1: length(nodes)){
-    if( grepl( "[", nodes[[i]]@graphics@name, fixed = TRUE  )){
-      names.cor <- unlist(strsplit(nodes[[i]]@graphics@name, "[", fixed = TRUE))
-      names.cor <- names.cor[which(names.cor != "")]
-    }else{
-      names.cor <- nodes[[i]]@graphics@name[[1]]
+    nodes <- kgraph@nodeData@defaults$KEGGNode$nodes
+    node.names <- NULL
+    for(node in nodes){
+        # print(node@graphics@name)
+        type <- node@type
+        if(grepl("\\,", type)){
+            names <- unlist(strsplit(node@graphics@name, "], ", fixed = TRUE))
+            names <- gsub("\\[", "", gsub("\\]", "", names))
+            types <- unlist(strsplit(type, split = "\\,"))
+            ns <- sapply(1:length(names), function(i)
+                get.name.node(names[i], types[i]))
+            new <- paste(ns, collapse = " ")
+        }else{
+            new <- get.name.node(node@graphics@name, type)
+        }
+        while(new %in% node.names)
+            new <- paste( new, "*", sep="")
+        node.names <- c( node.names, new )
     }
-    names <- NULL
-    for( j in 1:length(names.cor)){
-      names.cor[[j]] <- gsub("]", "", names.cor[[j]], fixed=TRUE)
-      names.cor[[j]] <- gsub("...", "", names.cor[[j]], fixed=TRUE)
-      namesj <- unlist(strsplit(names.cor[[j]], ","))
-      #       if( namesj[[1]] %in% names )
-      #         namesj[[1]] <- paste( namesj[[1]], "*", sep="")
-      names <- paste( names, namesj[[1]], sep = " ")
-    }
-    names <- sub( " ", "", names, fixed = TRUE )
-    while( names %in% node.names )
-      names <- paste( names, "*", sep="")
-    node.names <- c( node.names, names )
-  }
-  return( node.names )
+    return( node.names )
 }
 
+
+# Returns a list where each entry is the first name of each protein included in each node
+get.name.node <- function(name, type){
+    name <- gsub("...", "", name, fixed=TRUE)
+    if(type == "compound"){
+        comps <- load_compounds(comp.file)
+        if(name %in% comps$simple.ID){
+            names <- comps[comps$simple.ID == name, 2]
+        }else{
+            names <- name
+        }
+    }else if(type == "other"){
+        namesj <- unlist(strsplit(name, "\\("))
+        names <- gsub("\\)", "", namesj[[2]])
+    }else if(type == "gene"){
+        namesj <- unlist(strsplit(name, ","))
+        names <- namesj[[1]]
+    }else{
+        names <- name
+    }
+    return(names)
+}
 
 
 
@@ -411,6 +456,7 @@ delete.isolated.nodes <- function( graph ){
 
 
 collapse.nodes <- function( graph ){
+    graph <- removeInnecessaryBindings(graph)
   new.graph <- graph
   i <- 1
   while( i <= length( new.graph@nodeData@defaults$KEGGNode$nodes )){
@@ -841,4 +887,40 @@ contains.name.node <- function( vertex, name.node ){
         return(TRUE)
   }
   return(FALSE)
+}
+
+
+removeInnecessaryBindings <- function(graph, verbose = TRUE){
+    es <- graph@edgeData@defaults$KEGGEdge$edges
+    types <- sapply(es, function(x) if(!is.null(x@subtype$subtype)){x@subtype$subtype@name}else{x@type})
+    nodes1 <- as.character(sapply(es, function(x) x@entry1ID))
+    nodes2 <- as.character(sapply(es, function(x) x@entry2ID))
+    all.nodes <- unique(c(nodes1, nodes2))
+    all.nodes.unlist <- lapply(all.nodes, function(x) unlist(strsplit(x, split = " ")))
+    es.mat <- data.frame(nodes1, nodes2, types, stringsAsFactors = F)
+    es.mat$exist <- apply(es.mat[,c(1,2)], 1, function(v){
+        v1 <- unlist(strsplit(v[1], split = " "))
+        v2 <- unlist(strsplit(v[2], split = " "))
+        both <- unique(c(v1, v2))
+        any(sapply(all.nodes.unlist, function(x) all(both %in% x)))
+    })
+    if(any(es.mat$exist)){
+        toremove <- which(es.mat$exist == TRUE & es.mat$type == "binding/association")
+        for(i in toremove){
+            if(verbose)
+                message("Removing edge: ", es.mat$nodes1[i], " -> ", es.mat$nodes2[i])
+            graph <- removeKEGGgraphEdge(es.mat$nodes1[i], es.mat$nodes2[i], graph)
+        }
+    }
+    return(graph)
+}
+
+
+
+removeKEGGgraphEdge <- function(n1, n2, graph){
+    g <- removeEdge(n1, n2, graph)
+    eds <- g@edgeData@defaults$KEGGEdge$edges
+    index <- which(names(eds) == paste0(n1, "~", n2))
+    g@edgeData@defaults$KEGGEdge$edges <- eds[-index]
+    return(g)
 }

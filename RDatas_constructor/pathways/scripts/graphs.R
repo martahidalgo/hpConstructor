@@ -38,24 +38,31 @@ load.graphs <- function(input.folder,species,pathway.names=NULL){
 
 sif2patIGraph <- function(pref.file){
   # Read files
-  sif <- utils::read.table(paste0(pref.file, ".sif"), sep="\t", fill=T, stringsAsFactors=F, header=F)
-  att <- utils::read.table(paste0(pref.file, ".att"), sep="\t", fill=T, stringsAsFactors=F, header=T)
+  sif <- utils::read.table(paste0(pref.file, ".sif"), sep = "\t", fill = TRUE, 
+                           stringsAsFactors = FALSE, header = FALSE)
+  att <- utils::read.table(paste0(pref.file, ".att"), sep = "\t", fill = TRUE, 
+                           stringsAsFactors = FALSE, header = TRUE)
   rownames(att) <- att[,1]
 
   # Create igraph
-  ig <- graph.data.frame(sif[,c(1,3)], directed=T)
+  ig <- graph.data.frame(sif[,c(1,3)], directed = TRUE)
 
   # Add attributes
-  E(ig)$relation <- unlist(sapply(sif[,2], function(x){ifelse(x=="activation", 1, -1)}))
-  E(ig)$curved <- F
-  V(ig)$nodeX <- att[V(ig)$name,"X"]
-  V(ig)$nodeY <- att[V(ig)$name,"Y"] # max(att$Y) - att[V(ig)$name,"Y"] #
-  V(ig)$shape <- att[V(ig)$name,"shape"]
-  V(ig)$label.cex <- att[V(ig)$name,"label.cex"]
-  V(ig)$label.color <- att[V(ig)$name,"label.color"]
-  V(ig)$width <- att[V(ig)$name,"width"]
-  V(ig)$height <- att[V(ig)$name,"height"]
-  glist <- sapply(as.character(att[,"genesList"]), function(x){unlist(strsplit(x, split=","))})
+  E(ig)$relation <- unlist(sapply(sif[,2], function(x){
+      ifelse(x == "activation", 1, -1)
+      }))
+  E(ig)$curved <- FALSE
+  V(ig)$nodeX <- att[V(ig)$name, "X"]
+  V(ig)$nodeY <- att[V(ig)$name, "Y"] # max(att$Y) - att[V(ig)$name,"Y"] #
+  V(ig)$shape <- att[V(ig)$name, "shape"]
+  V(ig)$label.cex <- att[V(ig)$name, "label.cex"]
+  V(ig)$label.color <- att[V(ig)$name, "label.color"]
+  V(ig)$width <- att[V(ig)$name, "width"]
+  V(ig)$height <- att[V(ig)$name, "height"]
+  V(ig)$tooltip <- att[V(ig)$name, "tooltip"]
+  glist <- sapply(as.character(att[, "genesList"]), function(x){
+      unlist(strsplit(x, split = ","))
+      })
   names(glist) <- att[,"ID"]
   V(ig)$genesList <- glist[V(ig)$name]
   if(!is.null(att$label))
@@ -66,11 +73,14 @@ sif2patIGraph <- function(pref.file){
 
 
 # Write SIF files from KGML files
-transform.XML.to.SIF <- function(pathway.names, kgml.folder, sif.folder, metabolite = T){
+transform.XML.to.SIF <- function(pathway.names, kgml.folder, sif.folder, 
+                                 comp.list, metabolite = TRUE){
   g <- sapply(pathway.names, function(name.pathway){
     print(name.pathway)
-    ig <- parse.kegg.to.igraph( name.pathway, kgml.folder, genesOnly= !metabolite )
-    write.sif.files(ig, rep("white", length(V(ig))), paste0(sif.folder, name.pathway))
+    ig <- parse.kegg.to.igraph(name.pathway, kgml.folder, comp.list = comp.list, 
+                               genesOnly = !metabolite)
+    write.sif.files(ig, rep("white", length(V(ig))), 
+                    paste0(sif.folder, name.pathway))
   })
 }
 
@@ -80,25 +90,57 @@ write.sif.files <- function(ig, color, exit.file){
   write.nodes.file(ig, color, paste(exit.file, ".att", sep=""))
 }
 
-# Creates a .SIF file from the graph "rendergraph" with "NODE1 - REL- NODE2" format
+# Creates a .SIF file from the graph "rendergraph" with "NODE1 - REL- NODE2" 
+# format
 #      rgraph: pathigraph with render info (output from plotPathigraph)
 #      exit.file: root where the file will be stored
 write.sif.file <- function(ig, exit.file){
   sif <- get.edgelist(ig)
   sif <- cbind(sif, sif[,2])
-  sif[,2] <- unlist(lapply(E(ig)$relation, function(x){ifelse(x==1, "activation", "inhibition")}))
-  write.table(sif, file=exit.file, row.names=F, col.names=F, quote=F, sep="\t")
+  sif[,2] <- unlist(lapply(E(ig)$relation, function(x){
+      ifelse(x==1, "activation", "inhibition")
+      }))
+  write.table(sif, file = exit.file, row.names = FALSE, col.names = FALSE, 
+              quote = FALSE, sep = "\t")
 }
 
 
-# Creates a .TXT file with the attributes of the nodes. Included info: X and Y position, color, letter color and shape.
+# Creates a .TXT file with the attributes of the nodes. Included info: X and Y 
+# position, color, letter color and shape.
 #      rgraph: pathigraph with render info (output from plotPathigraph)
 #      exit.file: root where the file will be stored
 write.nodes.file <- function(ig, color, exit.file){
 
-  attrs <- cbind(V(ig)$name, gsub("\n"," / ",V(ig)$label), V(ig)$nodeX, V(ig)$nodeY, color, V(ig)$shape, V(ig)$type, V(ig)$label.cex, V(ig)$label.color, V(ig)$width, V(ig)$height, sapply(V(ig)$genesList, paste, collapse=","))
-  write.table(t(c("ID","label","X", "Y", "color", "shape", "type", "label.cex", "label.color", "width", "height", "genesList")), file=exit.file, row.names=F, col.names=F, quote=F, sep="\t")
-  write.table(attrs, append=TRUE, file=exit.file, row.names=F, col.names=F, quote=F, sep="\t")
+  attrs <- cbind(V(ig)$name, 
+                 gsub("\n", " / ", V(ig)$label), 
+                 V(ig)$nodeX, 
+                 V(ig)$nodeY, 
+                 color, 
+                 V(ig)$shape, 
+                 V(ig)$type, 
+                 V(ig)$label.cex, 
+                 V(ig)$label.color, 
+                 V(ig)$width, 
+                 V(ig)$height, 
+                 sapply(V(ig)$genesList, paste, collapse=","), 
+                 V(ig)$tooltip)
+  write.table(t(c("ID",
+                  "label",
+                  "X", 
+                  "Y", 
+                  "color", 
+                  "shape", 
+                  "type", 
+                  "label.cex", 
+                  "label.color", 
+                  "width", 
+                  "height", 
+                  "genesList", 
+                  "tooltip")), 
+              file = exit.file, row.names = FALSE, col.names = FALSE, 
+              quote = FALSE, sep = "\t")
+  write.table(attrs, append = TRUE, file = exit.file, row.names = FALSE, 
+              col.names = FALSE, quote = FALSE, sep = "\t")
 }
 
 
@@ -296,15 +338,6 @@ create.metaginfo.object <- function(fpgs, species, basal.value = 0.5){
 
   pathigraph.genes <- all.needed.genes(fpgs)
 
-  # Todos los genes a valor 0.5
-  genes.vals.05 <- matrix(basal.value, ncol=2, nrow=length(pathigraph.genes),
-                          dimnames=list(pathigraph.genes))
-  meta.05 <- NULL
-  meta.05$pathigraphs <- fpgs
-  results.05 <- hipathia(genes.vals.05, meta.05, test = FALSE)
-  results.dec.05 <- hipathia(genes.vals.05, meta.05, decompose = TRUE, 
-                             test = FALSE)
-
   # Create all.labelids table
   labelids <- sapply(fpgs, function(pg) cbind(pg$label.id,
                                               path.id = pg$path.id,
@@ -312,13 +345,23 @@ create.metaginfo.object <- function(fpgs, species, basal.value = 0.5){
   labelids <- do.call("rbind", labelids)
   rownames(labelids) <- labelids[,1]
   # labelids <- as.data.frame(labelids, strignsAsFactors = FALSE)
+  
+  # Todos los genes a valor 0.5
+  genes.vals.05 <- matrix(basal.value, ncol=2, nrow=length(pathigraph.genes),
+                          dimnames=list(pathigraph.genes, c("1", "2")))
+  meta.05 <- NULL
+  meta.05$pathigraphs <- fpgs
+  meta.05$all.labelids <- labelids
+  results.05 <- hipathia(genes.vals.05, meta.05, test = FALSE)
+  results.dec.05 <- hipathia(genes.vals.05, meta.05, decompose = TRUE, 
+                             test = FALSE)
 
   # Create metaginfo object
   metaginfo <- NULL
   metaginfo$species <- species
   metaginfo$all.genes <- pathigraph.genes
-  metaginfo$path.norm <- results.dec.05$all$path.vals[,1]
-  metaginfo$eff.norm <- results.05$all$path.vals[,1]
+  metaginfo$path.norm <- assay(results.dec.05, "paths")[,1]
+  metaginfo$eff.norm <- assay(results.05, "paths")[,1]
   metaginfo$pathigraphs <- fpgs
   metaginfo$all.labelids <- labelids
 

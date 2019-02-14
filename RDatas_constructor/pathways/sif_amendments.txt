@@ -260,7 +260,7 @@ path	action	node1	relation	node2
 04925	+	14 64	activation	34
 04925	-	14	activation	33
 04925	-	14	activation	34
-04932	+	132	activation	129 129 130
+04932	+	132	activation	129 130
 04933	+	75	activation	76
 04933	+	82	activation	81
 04933	+	3	activation	14

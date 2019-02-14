@@ -895,15 +895,17 @@ removeInnecessaryBindings <- function(graph, verbose = TRUE){
     types <- sapply(es, function(x) if(!is.null(x@subtype$subtype)){x@subtype$subtype@name}else{x@type})
     nodes1 <- as.character(sapply(es, function(x) x@entry1ID))
     nodes2 <- as.character(sapply(es, function(x) x@entry2ID))
+    all.nodes <- unique(c(nodes1, nodes2))
+    all.nodes.unlist <- lapply(all.nodes, function(x) unlist(strsplit(x, split = " ")))
     es.mat <- data.frame(nodes1, nodes2, types, stringsAsFactors = F)
-    es.mat$include <- apply(es.mat[,c(1,2)], 1, function(v){
+    es.mat$exist <- apply(es.mat[,c(1,2)], 1, function(v){
         v1 <- unlist(strsplit(v[1], split = " "))
         v2 <- unlist(strsplit(v[2], split = " "))
-        all(v1 %in% v2) | all(v2 %in% v1)
+        both <- unique(c(v1, v2))
+        any(sapply(all.nodes.unlist, function(x) all(both %in% x)))
     })
-    if(any(es.mat$include)){
-        head(es.mat)
-        toremove <- which(es.mat$include == TRUE & es.mat$type == "binding/association")
+    if(any(es.mat$exist)){
+        toremove <- which(es.mat$exist == TRUE & es.mat$type == "binding/association")
         for(i in toremove){
             if(verbose)
                 message("Removing edge: ", es.mat$nodes1[i], " -> ", es.mat$nodes2[i])

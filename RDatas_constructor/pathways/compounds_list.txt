@@ -1780,8 +1780,8 @@ cpd:C02160	Isomaltotriose
 cpd:C02161	2-Aminophenoxazin-3-one; 3-Aminophenoxazone; Isophenoxazine
 cpd:C02162	Isopimpinellin; 5,8-Dimethoxypsoralen
 cpd:C02163	L-Arginyl-tRNA(Arg); L-Arginyl-tRNA
-cpd:C02165	Leukotriene B4; (6Z,8E,10E,14Z)-(5S,12R)-5,12-Dihydroxyeicosa-6,8,10,14-tetraenoate; (6Z,8E,10E,14Z)-(5S,12R)-5,12-Dihydroxyicosa-6,8,10,14-tetraenoate; LTB4
-cpd:C02166	Leukotriene C4; LTC4
+cpd:C02165	LTB4; Leukotriene B4; (6Z,8E,10E,14Z)-(5S,12R)-5,12-Dihydroxyeicosa-6,8,10,14-tetraenoate; (6Z,8E,10E,14Z)-(5S,12R)-5,12-Dihydroxyicosa-6,8,10,14-tetraenoate
+cpd:C02166	LTC4; Leukotriene C4
 cpd:C02167	Maleylpyruvate; Maleylpyruvic acid; 3-Maleylpyruvate
 cpd:C02168	Mefenamic acid
 cpd:C02170	Methylmalonate; Methylmalonic acid

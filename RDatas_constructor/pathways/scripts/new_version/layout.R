@@ -276,26 +276,26 @@ add.functions.to.pathigraph <- function(pathigraph, entrez2hgnc, dbannot,
                                         p0mult = 5){
 
   newpathigraph <- pathigraph
+  
+  V(pathigraph$graph)$x <- V(pathigraph$graph)$nodeX
+  V(pathigraph$graph)$y <- V(pathigraph$graph)$nodeY
 
   last_node_funcs_list <- hipathia:::get_pathway_functions(pathigraph, dbannot,
                                                           entrez2hgnc,
                                                           use_last_nodes = 
                                                               use.last.nodes)
-  if(sum(is.na(last_node_funcs_list))>0)
+  if(sum(is.na(last_node_funcs_list)) > 0)
       last_node_funcs_list <- last_node_funcs_list[!is.na(last_node_funcs_list)]
-  last_node_funcs <- sapply(last_node_funcs_list,
-                            function(x) paste(x, collapse = "\n"))
-  nff <- data.frame(node = names(last_node_funcs),
-                    node_funs = paste0(names(last_node_funcs), "_func"),
-                    functions = last_node_funcs,
-                    stringsAsFactors = FALSE)
-
-  V(pathigraph$graph)$x <- V(pathigraph$graph)$nodeX
-  V(pathigraph$graph)$y <- V(pathigraph$graph)$nodeY
-
-  if(nrow(nff) == 0){
-    return(pathigraph)
+  if(length(last_node_funcs_list) == 0){
+      return(pathigraph)
   } else {
+      last_node_funcs <- sapply(last_node_funcs_list,
+                            function(x) paste(x, collapse = "\n"))
+      nff <- data.frame(node = names(last_node_funcs),
+                        node_funs = paste0(names(last_node_funcs), "_func"),
+                        functions = last_node_funcs,
+                        stringsAsFactors = FALSE)
+
     # create new graph
     if(verbose == TRUE)
         cat("Creating new graph...\n")
@@ -303,7 +303,9 @@ add.functions.to.pathigraph <- function(pathigraph, entrez2hgnc, dbannot,
                                        cbind(nff$node,
                                              paste0(nff$node, "_func"))))
     common <- V(pathigraph$graph)$name[V(pathigraph$graph)$name %in%
-                                           V(newgraph)$name]
+                                         V(newgraph)$name]
+    V(pathigraph$graph)$size <- 15
+    V(pathigraph$graph)$size2 <- 5
     newgraph <- add.param("x", pathigraph$graph, newgraph, common)
     newgraph <- add.param("y", pathigraph$graph, newgraph, common)
     newgraph <- add.param("shape", pathigraph$graph, newgraph, common)

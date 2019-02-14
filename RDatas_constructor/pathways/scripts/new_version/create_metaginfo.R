@@ -10,15 +10,15 @@ library(hipathia)
 # library(hpAnnot)
 
 
-hipath <- getwd()
-source(paste0(hipath, "/private/pathways/scripts/graphs.R"))
-source(paste0(hipath, "/private/pathways/scripts/KEGG_net.R"))
-source(paste0(hipath, "/private/pathways/scripts/layout.R"))
-source(paste0(hipath, "/../hipathia/R/utils.R"))
+hipath <- "RDatas_constructor/pathways/scripts/new_version/"
+source(paste0(hipath, "/graphs.R"))
+source(paste0(hipath, "/KEGG_net.R"))
+source(paste0(hipath, "/layout.R"))
+source("~/appl/hipathia/R/utils.R")
 # source(paste0(hipath, "/R/load.R"))
 
-ammend.file <- paste0(hipath, "/private/pathways/sif_amendments.txt")
-comp.file <- paste0(hipath, "/private/pathways/compound_list.txt")
+ammend.file <- paste0(hipath, "/../../sif_amendments.txt")
+comp.file <- paste0(hipath, "/../../compounds_list.txt")
 
 # FUNCTION
 load_compounds <- function(comp.file){
@@ -32,7 +32,7 @@ load_compounds <- function(comp.file){
 }
 
 compounds <- load_compounds(comp.file)
-save(compounds, file=paste0(hipath, "/private/pathways/compounds_list.RData"))
+save(compounds, file=paste0(hipath, "/../../compounds_list.RData"))
 
 # Parameters
 species <- c("hsa", "rno", "mmu")
@@ -40,9 +40,9 @@ species <- c("hsa", "rno", "mmu")
 for(spe in species){
 
     # set folders
-    kgml.folder <- paste0(hipath, "/private/pathways/", spe, "/kgml/")
-    sif.folder <- paste0(hipath, "/private/pathways/", spe, "/sif/")
-    tmp.folder <- paste0(hipath, "/private/pathways/", spe, "/temp/")
+    kgml.folder <- paste0(hipath, "/../../", spe, "/kgml/")
+    sif.folder <- paste0(hipath, "/../../", spe, "/sif/")
+    tmp.folder <- paste0(hipath, "/../../", spe, "/temp/")
     pathway.names <- unique(gsub(".xml", "", list.files(kgml.folder, 
                                                         pattern="xml")))
     
@@ -66,16 +66,16 @@ for(spe in species){
 
     # Load pathways from created SIF files
     pgs <- load.graphs(sif.folder, spe)
-    save(pgs, file=paste0(tmp.folder, "/pgs.RData"))
+    save(pgs, file=paste0(tmp.folder, "/pgs_2019_02_13.RData"))
 
     # Ammend pathways
     apgs <- amend.kegg.pathways(ammend.file, pgs, spe)
-    save(apgs, file=paste0(tmp.folder, "/apgs.RData"))
+    save(apgs, file=paste0(tmp.folder, "/apgs_2019_02_13.RData"))
 
     # Add final functions to the pathways
     fpgs <- add.functions.to.pathigraphs(apgs, entrez2hgnc, dbannot, 
                                          maxiter = 1000)
-    save(fpgs, file=paste0(tmp.folder, "/fpgs.RData"))
+    save(fpgs, file=paste0(tmp.folder, "/fpgs_2019_02_13.RData"))
 
     # Compute Path Normalization Values
     metaginfo <- create.metaginfo.object(fpgs, spe)

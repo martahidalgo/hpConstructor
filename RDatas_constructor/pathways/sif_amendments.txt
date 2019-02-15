@@ -315,6 +315,8 @@ path	action	node1	relation	node2
 05169	+	54 55 59	activation	56
 05205	+	7 93	activation	7 9
 05212	-	53	activation	3
+05212	-	20	activation	43
+05212	-	21	activation	43
 05212	+	3	activation	53
 05213	-	20	activation	25
 05213	+	20	inhibition	25
@@ -357,3 +359,6 @@ path	action	node1	relation	node2
 04150	+	50	activation	64 71 70
 04150	+	50	activation	64 68
 04150	+	17	inhibition	66
+04218	+	65	activation	62
+04218	+	65	activation	66
+04218	-	96	inhibition	89

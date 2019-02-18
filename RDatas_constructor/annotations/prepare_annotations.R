@@ -5,18 +5,18 @@
 # species <- "mmu"
 
 all_species <- c("hsa", "mmu", "rno")
-dir.create("private/annotations/annotations/")
+dir.create("RDatas_constructor/annotations/annotations/")
 
 for(species in all_species){
 
     print(species)
 
-    ann_path <- "private/annotations/annotations/"
-    raw_path <- "private/annotations/raw_data/"
-    ann_spe_path <- paste0("private/annotations/annotations/", species, "/")
-    raw_spe_path <- paste0("private/annotations/raw_data/", species, "/")
-    if(!dir.exists(paste0("private/annotations/annotations/", species))){
-        dir.create(paste0("private/annotations/annotations/", species))
+    ann_path <- "RDatas_constructor/annotations/annotations/"
+    raw_path <- "RDatas_constructor/annotations/raw_data/"
+    ann_spe_path <- paste0("RDatas_constructor/annotations/annotations/", species, "/")
+    raw_spe_path <- paste0("RDatas_constructor/annotations/raw_data/", species, "/")
+    if(!dir.exists(paste0("RDatas_constructor/annotations/annotations/", species))){
+        dir.create(paste0("RDatas_constructor/annotations/annotations/", species))
     }
 
     
@@ -139,7 +139,7 @@ for(species in all_species){
         open(con)
         while (length(line <- readLines(con, n = 1, warn = FALSE)) > 0) {
             fields <- unlist(strsplit(line, ": "))
-            if(length(fields)>1){
+            if(length(fields) > 1){
                 key <- fields[1]
                 value <- fields[2]
                 if(key=="id"){
@@ -164,8 +164,8 @@ for(species in all_species){
     }
 
     # #gos <- obo.parser("test.obo")
-    # gos <- obo.parser("private/annotations/go-basic.obo")
-    # save(gos,file="private/annotations/go-basic.rdata")
+    # gos <- obo.parser("RDatas_constructor/annotations/go-basic.obo")
+    # save(gos,file="RDatas_constructor/annotations/go-basic.rdata")
     load(paste0(raw_path, "/go-basic.rdata"))
 
     go_namespace <- sapply(gos, "[[", "namespace")
@@ -237,7 +237,7 @@ for(species in all_species){
     minigo <- go_bp_annots[go_bp_annots$evidence == "EXP" |
                                go_bp_annots$evidence == "IDA", ]
     namegos <- go_bp_frame[minigo[,2],2]
-    goname <- as.data.frame(cbind(minigo$gene, namegos))
+    goname <- as.data.frame(cbind(minigo$gene, namegos, minigo$term))
     goname_file <- paste0(ann_spe_path, "go_bp_", species, ".annot")
     write.table(goname,
                 file = goname_file,

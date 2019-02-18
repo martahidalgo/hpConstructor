@@ -205,7 +205,7 @@ kegg2igraph <- function( name.pathway, kgraph, comp.list ){
                   paste0("<a target='_blank' ",
                          "href='http://www.genome.jp/dbget-bin/www_bget?",
                          species, ":", gen, "'>", gen, "</a> (", 
-                         hgnc[hgnc[,1] == gen, 2], ")")
+                         get.hgnc.gene(hgnc, gen), ")")
               }else{
                   ""
               }
@@ -236,6 +236,19 @@ kegg2igraph <- function( name.pathway, kgraph, comp.list ){
   return(ig)
 }
 
+
+get.hgnc.gene <- function(hgnc, gen){
+    trans <- hgnc[hgnc[,1] == gen, 2]
+    locs <- grepl("LOC", trans)
+    if(sum(!locs) > 0)
+        trans <- trans[!locs]
+    if (length(trans) > 0){
+        tran <- trans[1]
+    }else{
+        tran <- ""
+    }
+    return(tran)
+}
 
 get.shape <- function(kgraph){
   shapes <- sapply(kgraph@nodeData@defaults$KEGGNode$nodes, function(x){
@@ -286,7 +299,7 @@ get.name.nodes <- function( kgraph ){
         # print(node@graphics@name)
         type <- node@type
         if(grepl("\\,", type)){
-            names <- unlist(strsplit(node@graphics@name, "], ", fixed = TRUE))
+            names <- unlist(strsplit(node@graphics@name, "], [", fixed = TRUE))
             names <- gsub("\\[", "", gsub("\\]", "", names))
             types <- unlist(strsplit(type, split = "\\,"))
             ns <- sapply(1:length(names), function(i)

@@ -9,16 +9,17 @@ library(graph)
 library(hipathia)
 # library(hpAnnot)
 
-
-hipath <- "RDatas_constructor/pathways/scripts/new_version/"
+path <- "~/appl/hpConstructor/RDatas_constructor/pathways/"
+setwd(path)
+hipath <- paste0(path, "scripts/")
 source(paste0(hipath, "/graphs.R"))
 source(paste0(hipath, "/KEGG_net.R"))
 source(paste0(hipath, "/layout.R"))
 source("~/appl/hipathia/R/utils.R")
 # source(paste0(hipath, "/R/load.R"))
 
-ammend.file <- paste0(hipath, "/../../sif_amendments.txt")
-comp.file <- paste0(hipath, "/../../compounds_list.txt")
+ammend.file <- paste0(hipath, "/../sif_amendments.txt")
+comp.file <- paste0(hipath, "/../compounds_list.txt")
 
 # FUNCTION
 load_compounds <- function(comp.file){
@@ -32,7 +33,7 @@ load_compounds <- function(comp.file){
 }
 
 compounds <- load_compounds(comp.file)
-save(compounds, file=paste0(hipath, "/../../compounds_list.RData"))
+# save(compounds, file=paste0(hipath, "/../compounds_list.RData"))
 
 # Parameters
 species <- c("hsa", "rno", "mmu")
@@ -40,9 +41,9 @@ species <- c("hsa", "rno", "mmu")
 for(spe in species){
 
     # set folders
-    kgml.folder <- paste0(hipath, "/../../", spe, "/kgml/")
-    sif.folder <- paste0(hipath, "/../../", spe, "/sif/")
-    tmp.folder <- paste0(hipath, "/../../", spe, "/temp/")
+    kgml.folder <- paste0(hipath, "/../", spe, "/kgml/")
+    sif.folder <- paste0(hipath, "/../", spe, "/sif/")
+    tmp.folder <- paste0(hipath, "/../", spe, "/temp/")
     pathway.names <- unique(gsub(".xml", "", list.files(kgml.folder, 
                                                         pattern="xml")))
     

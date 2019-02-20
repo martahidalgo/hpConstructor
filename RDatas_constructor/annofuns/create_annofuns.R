@@ -5,22 +5,26 @@ library(hipathia)
 library(hpAnnot)
 
 species <- c("hsa", "mmu", "rno")
+rda_path <- "RDatas_constructor/RDatas/"
 
 for(spe in species){
 
     print(spe)
-    mgi <- load(paste0("private/pathways/", spe, "/temp/meta_graph_info_", 
-                      spe, ".RData"))
+    mgi <- load(paste0(rda_path, "/meta_graph_info_", spe, ".rda"))
     metaginfo <- get(mgi)
     
     # Uniprot
-    annofuns <- hipathia:::annotate.paths(metaginfo, "uniprot")
-    save(annofuns, file = paste0("private/annofuns/annofuns_uniprot_",
+    unidb <- load(paste0(rda_path,  "annot_uniprot_", spe, ".rda"))
+    uni_bp_annot <- get(unidb)
+    annofuns <- hipathia:::annotate_paths(metaginfo, uni_bp_annot)
+    save(annofuns, file = paste0("RDatas_constructor/annofuns/annofuns_uniprot_",
                                  spe, ".RData"))
 
     # GO
-    annofuns <- hipathia:::annotate.paths(metaginfo, "GO")
-    save(annofuns, file = paste0("private/annofuns/annofuns_GO_",
+    godb <- load(paste0(rda_path, "annot_GO_", spe, ".rda"))
+    go_bp_annot <- get(godb)
+    annofuns <- hipathia:::annotate_paths(metaginfo, go_bp_annot)
+    save(annofuns, file = paste0("RDatas_constructor/annofuns/annofuns_GO_",
                                  spe, ".RData"))
 
 

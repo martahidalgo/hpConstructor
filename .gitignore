@@ -2,6 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
+/RDatas_constructor/RDatas/
+/RDatas_constructor/annofuns/*.RData
 /RDatas_constructor/annotations/annotations/
 /RDatas_constructor/annotations/raw_data/
 /RDatas_constructor/pathways/hsa/

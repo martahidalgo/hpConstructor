@@ -6,7 +6,7 @@
 
 species <- c("hsa", "mmu", "rno")
 dbs <- c("GO", "uniprot")
-edpath <- "RDatas_constructor/annotations/final_annotations/"
+edpath <- "RDatas_constructor/RDatas/"
 
 # XREF
 #------------------------

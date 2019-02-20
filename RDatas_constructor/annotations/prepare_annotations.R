@@ -237,12 +237,12 @@ for(species in all_species){
     minigo <- go_bp_annots[go_bp_annots$evidence == "EXP" |
                                go_bp_annots$evidence == "IDA", ]
     namegos <- go_bp_frame[minigo[,2],2]
-    goname <- as.data.frame(cbind(minigo$gene, namegos, minigo$term))
+    goname <- as.data.frame(cbind(gene = minigo$gene, "function" = minigo$term, term = namegos))
     goname_file <- paste0(ann_spe_path, "go_bp_", species, ".annot")
     write.table(goname,
                 file = goname_file,
                 sep = "\t",
-                col.names = FALSE,
+                col.names = TRUE,
                 row.names = FALSE,
                 quote = FALSE)
 

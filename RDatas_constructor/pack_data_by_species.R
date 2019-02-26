@@ -8,6 +8,7 @@ species <- c("hsa", "mmu", "rno")
 dbs <- c("GO", "uniprot")
 setwd("RDatas_constructor/")
 edpath <- "RDatas/"
+date <- "2019_02_25"
 version <- "v2"
 
 # XREF
@@ -84,7 +85,7 @@ for(spe in species){
 # All together in different files
 for(spe in species){
     path <- paste0("pathways/", spe, "/temp/meta_graph_info_",
-                   spe, ".RData")
+                   spe, "_", date, ".RData")
     mgi <- load(path)
     meta_graph_info <- get(mgi)
     meta_graph_info$species <- spe

@@ -37,6 +37,7 @@ compounds <- load_compounds(comp.file)
 
 # Parameters
 species <- c("hsa", "rno", "mmu")
+date <- gsub("-", "_", Sys.Date())
 
 for(spe in species){
 
@@ -67,21 +68,21 @@ for(spe in species){
 
     # Load pathways from created SIF files
     pgs <- load.graphs(sif.folder, spe)
-    save(pgs, file=paste0(tmp.folder, "/pgs_2019_02_13.RData"))
+    save(pgs, file=paste0(tmp.folder, "/pgs_", date, ".RData"))
 
     # Ammend pathways
     apgs <- amend.kegg.pathways(ammend.file, pgs, spe)
-    save(apgs, file=paste0(tmp.folder, "/apgs_2019_02_13.RData"))
+    save(apgs, file=paste0(tmp.folder, "/apgs_", date, ".RData"))
 
     # Add final functions to the pathways
     fpgs <- add.functions.to.pathigraphs(apgs, entrez2hgnc, dbannot, 
                                          maxiter = 1000)
-    save(fpgs, file=paste0(tmp.folder, "/fpgs_2019_02_13.RData"))
+    save(fpgs, file=paste0(tmp.folder, "/fpgs_", date, ".RData"))
 
     # Compute Path Normalization Values
     metaginfo <- create.metaginfo.object(fpgs, spe)
     save(metaginfo, file=paste0(tmp.folder, "/meta_graph_info_", spe,
-                                "_2019_02_13.RData"))
+                                "_", date, ".RData"))
 
 }
 

@@ -11,7 +11,7 @@ create.pseudo.metaginfo <- function(pathways, group.by, verbose = TRUE){
         unlist(strsplit(n, split = "\\."))[2]})
     
     if(group.by == "uniprot" | group.by == "GO"){
-        annofuns <- load_annofuns(db = group.by, pathways$species)
+        annofuns <- hipathia:::load_annofuns(db = group.by, pathways$species)
         annofuns <- annofuns[!is.na(annofuns$funs),]
         annots <- annofuns[,c(2,3)]
     }else if(group.by == "genes"){

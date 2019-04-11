@@ -6,10 +6,12 @@
 /RDatas_constructor/annofuns/*.RData
 /RDatas_constructor/annotations/annotations/
 /RDatas_constructor/annotations/raw_data/
+/RDatas_constructor/pathways/dme/
 /RDatas_constructor/pathways/hsa/
 /RDatas_constructor/pathways/mmu/
 /RDatas_constructor/pathways/rno/
 /RDatas_constructor/xref/.Rhistory
+/RDatas_constructor/xref/dme/
 /RDatas_constructor/xref/hsa/
 /RDatas_constructor/xref/mmu/
 /RDatas_constructor/xref/rno/

@@ -32,7 +32,8 @@ for(species in all_species){
     }
     clean_entrez_hgnc <- raw_hgnc[!is.na(raw_hgnc$EntrezGene.ID),]
     agn <- clean_entrez_hgnc$Associated.Gene.Name
-    clean_entrez_hgnc <- clean_entrez_hgnc[!is.na(agn),]
+    selcols <- c("EntrezGene.ID", "Associated.Gene.Name")
+    clean_entrez_hgnc <- clean_entrez_hgnc[!is.na(agn),selcols]
     eh_file <- paste0(ann_spe_path, "/entrez_hgnc_", species, ".annot")
     write.table(clean_entrez_hgnc,
                 file = eh_file,
@@ -50,7 +51,8 @@ for(species in all_species){
 
     create_gene_annotations <- function(x){
         genes <- unlist(strsplit(as.character(x['Gene.names'])," "))
-        keywords <- unlist(strsplit(as.character(x['Keywords']),"; "))
+        x['Keywords'] <- gsub("; ", ";", x['Keywords'])
+        keywords <- unlist(strsplit(as.character(x['Keywords']),";"))
         annots <- cbind(rep(genes, each = length(keywords)),
                         rep(keywords, times = length(genes)))
         return(annots)

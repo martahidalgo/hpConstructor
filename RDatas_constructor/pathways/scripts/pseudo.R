@@ -28,21 +28,26 @@ create.pseudo.metaginfo <- function(pathways, group.by, verbose = TRUE){
         stop("Parameter `group.by` not recognized")
     }
     
-    pseudo <- get.pseudo.pathigraphs(subgraphs, annots, verbose = verbose)
+    pseudo <- get.pseudo.pathigraphs(subgraphs, annots, group.by, 
+                                     pathways$species, verbose = verbose)
     
     pseudo.meta <- NULL
     pseudo.meta$pathigraphs <- pseudo
     pseudo.meta$species <- pathways$species
     pseudo.meta$all.labelids <- pathways$all.labelids
+    pseudo.meta$group.by <- group.by
     
     return(pseudo.meta)
 }
 
 
 
-get.pseudo.pathigraphs <- function(subgraphs, annots, verbose = TRUE){
+get.pseudo.pathigraphs <- function(subgraphs, annots, group.by, species, 
+                                   verbose = TRUE){
     
     categories <- unique(annots[,2])
+    if(group.by == "GO")
+        go.names <- get_go_names(categories, species)
     pseudo_pathigraphs <- list()
     for(i in 1:length(categories)){
         if(verbose == TRUE)
@@ -51,8 +56,14 @@ get.pseudo.pathigraphs <- function(subgraphs, annots, verbose = TRUE){
         selnames <- annots[which(annots[,2] == categories[i]),1]
         selsub <- subgraphs[selnames]
         cat("    found ", length(selsub), " subgraphs...\n", sep = "")
-        path.id <- paste0("term_", i)
-        cpfs <- create.pathigraph.from.subgraphs(selsub, categories[i], path.id)
+        if(group.by == "GO"){
+            path.id <- categories[i]
+            path.name <- go.names[i]
+        }else{
+            path.name <- categories[i]
+            path.id <- paste0("term_", i)
+        }
+        cpfs <- create.pathigraph.from.subgraphs(selsub, path.name, path.id)
         pseudo_pathigraphs[[path.id]] <- cpfs
     }
     
@@ -130,6 +141,7 @@ create.pathigraph.from.subgraphs <- function(selsub, path.name, path.id){
                    label.color = V(x)$label.color,
                    label.cex = V(x)$label.cex,
                    genesList = sapply(V(x)$genesList, paste, collapse = ","),
+                   tooltip = V(x)$tooltip,
                    stringsAsFactors = FALSE)
     })))
     rownames(node_atts) <- node_atts$name

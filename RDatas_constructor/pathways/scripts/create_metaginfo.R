@@ -42,9 +42,9 @@ date <- gsub("-", "_", Sys.Date())
 for(spe in species){
 
     # set folders
-    kgml.folder <- paste0(hipath, "/../", spe, "/kgml/")
-    sif.folder <- paste0(hipath, "/../", spe, "/sif/")
-    tmp.folder <- paste0(hipath, "/../", spe, "/temp/")
+    kgml.folder <- paste0(path, spe, "/kgml/")
+    sif.folder <- paste0(path, spe, "/sif/")
+    tmp.folder <- paste0(path, spe, "/temp/")
     pathway.names <- unique(gsub(".xml", "", list.files(kgml.folder, 
                                                         pattern="xml")))
     
@@ -75,10 +75,11 @@ for(spe in species){
     save(apgs, file=paste0(tmp.folder, "/apgs_", date, ".RData"))
 
     # Add final functions to the pathways
-    fpgs <- add.functions.to.pathigraphs(apgs, entrez2hgnc, dbannot, 
+    fpgs <- add.functions.to.pathigraphs(apgs, entrez2hgnc, dbannot,
                                          maxiter = 1000)
     save(fpgs, file=paste0(tmp.folder, "/fpgs_", date, ".RData"))
-
+    # load(file=paste0(tmp.folder, "/fpgs_", date, ".RData"))
+    
     # Compute Path Normalization Values
     metaginfo <- create.metaginfo.object(fpgs, spe)
     save(metaginfo, file=paste0(tmp.folder, "/meta_graph_info_", spe,

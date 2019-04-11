@@ -6,9 +6,9 @@
 
 species <- c("hsa", "mmu", "rno")
 dbs <- c("GO", "uniprot")
-setwd("RDatas_constructor/")
+setwd("~/appl/hpConstructor/RDatas_constructor/")
 edpath <- "RDatas/"
-date <- "2019_02_25"
+date <- gsub("-", "_", Sys.Date())
 version <- "v2"
 
 # XREF
@@ -112,7 +112,7 @@ for(db in dbs){
 feats <- c("genes", "uniprot", "GO")
 for(spe in species){
     for(feat in feats){
-        file <- paste0("pathways/pseudo/pmgi_", spe, "_", feat,".RData")
+        file <- paste0("pathways/", spe, "/temp/pmgi_", spe, "_", feat,"_", date, ".RData")
         pseudo <- load(file)
         pmgi <- get(pseudo)
         pf <- paste0(edpath, "pmgi_", spe, "_", feat, "_", version, ".rda")

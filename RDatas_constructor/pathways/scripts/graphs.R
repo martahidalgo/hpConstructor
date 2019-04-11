@@ -364,6 +364,7 @@ create.metaginfo.object <- function(fpgs, species, basal.value = 0.5){
   metaginfo$eff.norm <- assay(results.05, "paths")[,1]
   metaginfo$pathigraphs <- fpgs
   metaginfo$all.labelids <- labelids
+  metaginfo$group.by <- "pathways"
 
   return(metaginfo)
 }

@@ -20,3 +20,5 @@ Para rehacer todos los archivos habría que ejecutar en este orden:
 13.- Ejecutar parte PSEUDO PATHWAYS de pack_data_by_species.R
 
 Al finalizar el proceso, todos los archivos creados estarán guardados en la carpeta /RDatas.
+
+Este proceso funciona para todas las especies excepto Drosophila Melanogaster por ahora. 

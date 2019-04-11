@@ -4,9 +4,13 @@
 
 rm(list = ls())
 
-library(hipathia)
+# library(hipathia)
+library(devtools)
+load_all("~/appl/hipathia/")
+load_all("~/appl/hpAnnot/")
+source("~/appl/hipathia/R/load_hpAnnot.R")
 
-hipath <- getwd()
+hipath <- "~/appl/hpConstructor/"
 hipath <- paste0(hipath, "/RDatas_constructor/pathways/")
 source(paste0(hipath, "scripts/pseudo.R"))
 date <- gsub("-", "_", Sys.Date())

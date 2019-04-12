@@ -51,11 +51,11 @@ process_species <- function(xref_folder){
 
 ### process species
 
-setwd("private/xref")
+setwd("RDatas_constructor/xref")
 species <- c("hsa", "mmu", "rno")
 
 for(spe in species){
-  cat(">>>Processing", spe, "\n")
+  cat(">>> Processing", spe, "\n")
   process_species(spe)
   cat("\n\n")
 }
